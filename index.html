@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hemas Possibility Playbook</title>
+    <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-grad-1: #e0e7ff;
+            --bg-grad-2: #f3f4f6;
+            --btn-bg: rgba(255, 255, 255, 0.7);
+            --btn-border: rgba(255, 255, 255, 0.8);
+            --btn-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --text-main: #1e293b;
+            --accent: #002D72;
+        }
+
+        [data-theme="dark"] {
+            --bg-grad-1: #0f172a;
+            --bg-grad-2: #1e293b;
+            --btn-bg: rgba(30, 41, 59, 0.7);
+            --btn-border: rgba(255, 255, 255, 0.2);
+            --btn-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --text-main: #f8fafc;
+            --accent: #38bdf8;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body { 
+            background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2));
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            overflow: hidden; height: 100vh; margin: 0;
+            transition: background 0.5s ease;
+        }
+
+        #landing-page {
+            position: fixed; inset: 0; z-index: 50;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            perspective: 1200px;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .hero-book {
+            width: 300px; height: 420px;
+            background-image: url('assets/p1.jpg');
+            background-size: cover;
+            border-radius: 8px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            transform: rotateY(-15deg) rotateX(5deg);
+            transition: transform 0.1s ease-out;
+            margin-bottom: 40px;
+            cursor: pointer;
+        }
+
+        .enter-btn {
+            padding: 16px 40px;
+            font-size: 18px; font-weight: 600;
+            color: var(--text-main);
+            background: var(--btn-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--btn-border);
+            border-radius: 99px;
+            box-shadow: var(--btn-shadow);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .enter-btn:hover { transform: scale(1.05); }
+
+        #reader-app {
+            opacity: 0; pointer-events: none;
+            transition: opacity 1s ease;
+            height: 100%; display: flex; flex-direction: column;
+        }
+
+        .header {
+            height: 64px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px;
+            position: absolute; top: 0; left: 0; right: 0; z-index: 40;
+        }
+        
+        .logo-btn { display: flex; align-items: center; gap: 12px; text-decoration: none; transition: opacity 0.2s; }
+        .logo-btn:hover { opacity: 0.8; }
+        .logo-icon {
+            width: 36px; height: 36px;
+            background: var(--accent); color: white;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .logo-text { display: flex; flex-direction: column; }
+        .logo-title { font-size: 14px; font-weight: 700; color: var(--text-main); }
+        .logo-sub { font-size: 10px; font-weight: 600; opacity: 0.7; color: var(--text-main); text-transform: uppercase; }
+
+        #viewport { flex: 1; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: grab; }
+        #viewport:active { cursor: grabbing; }
+        #pan-layer { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+
+        .flip-book { display: none; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+        .page { background: white; overflow: hidden; }
+        .page img { width: 100%; height: 100%; object-fit: contain; }
+
+        .dock {
+            position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+            z-index: 50;
+            display: flex; align-items: center; gap: 16px;
+            background: transparent;
+            padding: 10px;
+        }
+
+        .icon-btn {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            background: var(--btn-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--btn-border);
+            color: var(--text-main);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--btn-shadow);
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-decoration: none; /* For the anchor tag */
+        }
+        .icon-btn:hover { transform: translateY(-4px) scale(1.1); }
+        .icon-btn i { width: 20px; height: 20px; }
+
+        .page-count-bubble {
+            background: var(--btn-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--btn-border);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px; font-weight: 700;
+            box-shadow: var(--btn-shadow);
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- LANDING PAGE -->
+    <div id="landing-page">
+        <div class="hero-book" id="hero-book"></div>
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="font-size: 32px; font-weight: 800; color: var(--text-main); margin: 0 0 8px 0;">Possibility Playbook</h1>
+            <p style="font-size: 16px; opacity: 0.7; color: var(--text-main); margin: 0;">Transformation Office • 2025</p>
+        </div>
+        <button class="enter-btn" id="enter-btn">
+            <span>Open Magazine</span>
+            <i data-lucide="book-open"></i>
+        </button>
+    </div>
+
+    <!-- READER -->
+    <div id="reader-app">
+        <div class="header">
+            <a href="https://hemas.com/" target="_blank" class="logo-btn" title="Visit Website">
+                <div class="logo-icon">H</div>
+                <div class="logo-text">
+                    <span class="logo-title">POSSIBILITY PLAYBOOK</span>
+                    <span class="logo-sub">TRANSFORMATION OFFICE</span>
+                </div>
+            </a>
+            <button class="icon-btn" id="theme-toggle-top" style="width:40px; height:40px;">
+                <i data-lucide="moon"></i>
+            </button>
+        </div>
+
+        <div id="viewport">
+            <div id="pan-layer">
+                <div id="book" class="flip-book"></div>
+            </div>
+        </div>
+
+        <!-- INVISIBLE DOCK -->
+        <div class="dock">
+            <button class="icon-btn" id="prev" title="Previous"><i data-lucide="arrow-left"></i></button>
+            <div class="page-count-bubble" id="page-num">-- / --</div>
+            <button class="icon-btn" id="next" title="Next"><i data-lucide="arrow-right"></i></button>
+            
+            <div style="width: 20px;"></div> 
+            
+            <button class="icon-btn" id="zoom-out"><i data-lucide="minus"></i></button>
+            <button class="icon-btn" id="zoom-in"><i data-lucide="plus"></i></button>
+            <button class="icon-btn" id="reset" title="Fit to Screen"><i data-lucide="maximize"></i></button>
+            
+            <div style="width: 20px;"></div>
+
+            <!-- DOWNLOAD BUTTON -->
+            <a href="assets/magazine.pdf" download="Hemas_Playbook.pdf" class="icon-btn" title="Download PDF">
+                <i data-lucide="download"></i>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        
+        const numPages = 40;
+        const bookEl = document.getElementById('book');
+        const panLayer = document.getElementById('pan-layer');
+        const landingPage = document.getElementById('landing-page');
+        const readerApp = document.getElementById('reader-app');
+        
+        // 1. Inject Images
+        let pagesHTML = "";
+        for(let i=1; i<=numPages; i++) {
+            pagesHTML += `
+                <div class="page">
+                    <img src="assets/p${i}.jpg" loading="${i < 4 ? 'eager' : 'lazy'}" alt="Page ${i}" draggable="false" />
+                </div>`;
+        }
+        bookEl.innerHTML = pagesHTML;
+
+        // 2. Landing Page Tilt
+        document.addEventListener('mousemove', (e) => {
+            if(landingPage.style.opacity === '0') return;
+            const x = (window.innerWidth / 2 - e.clientX) / 30;
+            const y = (window.innerHeight / 2 - e.clientY) / 30;
+            document.getElementById('hero-book').style.transform = `rotateY(${-15 + x}deg) rotateX(${5 - y}deg)`;
+        });
+
+        // 3. Panzoom Configuration
+        const panzoom = Panzoom(panLayer, {
+            maxScale: 5,
+            minScale: 0.5,
+            noBind: true
+        });
+        
+        panLayer.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
+        
+        let isZoomed = false;
+        panLayer.addEventListener('dblclick', (e) => {
+            if(isZoomed) { panzoom.reset(); isZoomed = false; } 
+            else { panzoom.zoomToPoint(2.0, { clientX: e.clientX, clientY: e.clientY }); isZoomed = true; }
+        });
+
+        // 4. Initialize Flipbook
+        setTimeout(() => {
+            const isMobile = window.innerWidth < 768;
+            const pageFlip = new St.PageFlip(bookEl, {
+                width: 595, height: 842,
+                size: 'stretch',
+                minWidth: 300, maxWidth: 1000,
+                minHeight: 400, maxHeight: 1400,
+                showCover: true,
+                usePortrait: isMobile,
+                mobileScrollSupport: false 
+            });
+
+            pageFlip.loadFromHTML(document.querySelectorAll('.page'));
+
+            pageFlip.on('flip', (e) => {
+                document.getElementById('page-num').innerText = (e.data + 1) + ' / ' + pageFlip.getPageCount();
+            });
+
+            const startExperience = () => {
+                landingPage.style.opacity = '0';
+                landingPage.style.transform = 'scale(1.5)';
+                setTimeout(() => landingPage.style.display = 'none', 800);
+                
+                readerApp.style.pointerEvents = 'auto';
+                readerApp.style.opacity = '1';
+                bookEl.style.display = 'block';
+                pageFlip.updateFromHtml(document.querySelectorAll('.page'));
+                document.getElementById('page-num').innerText = '1 / ' + pageFlip.getPageCount();
+
+                setTimeout(() => {
+                    panzoom.zoom(0.65, { animate: true });
+                }, 500);
+            };
+
+            document.getElementById('enter-btn').onclick = startExperience;
+            document.getElementById('hero-book').onclick = startExperience;
+
+            document.getElementById('prev').onclick = () => pageFlip.flipPrev();
+            document.getElementById('next').onclick = () => pageFlip.flipNext();
+            document.getElementById('zoom-in').onclick = () => panzoom.zoomIn();
+            document.getElementById('zoom-out').onclick = () => panzoom.zoomOut();
+            document.getElementById('reset').onclick = () => panzoom.reset();
+
+            const themeToggle = document.getElementById('theme-toggle-top');
+            const html = document.documentElement;
+            let isDark = false;
+
+            themeToggle.onclick = () => {
+                isDark = !isDark;
+                html.setAttribute('data-theme', isDark ? 'dark' : 'light');
+                themeToggle.innerHTML = isDark ? '<i data-lucide="sun"></i>' : '<i data-lucide="moon"></i>';
+                lucide.createIcons();
+            };
+
+            document.addEventListener('keydown', (e) => {
+                if(landingPage.style.opacity !== '0') {
+                    if(e.key === "Enter") startExperience();
+                    return;
+                }
+                if(e.key === "ArrowRight") pageFlip.flipNext();
+                if(e.key === "ArrowLeft") pageFlip.flipPrev();
+                if(e.key === "+" || e.key === "=") panzoom.zoomIn();
+                if(e.key === "-") panzoom.zoomOut();
+            });
+
+        }, 100);
+
+    </script>
+</body>
+</html>
